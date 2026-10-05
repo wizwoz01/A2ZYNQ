@@ -1,0 +1,241 @@
+;
+; diskmenu.a65 -- boot menu for the Disk II card (hdl/disk/apple_disk.sv).
+; Assemble:  python3 asm65.py diskmenu.a65 diskmenu.hex --size 2048 --bin diskmenu.bin
+; (diskmenu.bin is what a2hostd embeds: boards/a2n20v2-SmartZynq/src/a2hostd/include/disk_menu_code.h)
+;
+; The card's boot ROM (diskii.hex) calls this instead of its slot finder:
+;     $Cn21  BIT $CFFF      free $C800-$CFFF (the next $Cnxx fetch gives it to this card)
+;     $Cn24  JSR $C800
+;     $Cn27  LDX $2B        then NOPs up to $Cn2F, where the stock seek + boot code
+;                           continues; the $Cn5C sector reader that DOS and ProDOS
+;                           boot code call is untouched.
+;
+; Card RAM while the card owns $C800-$CFFF (host side = SPI space 4, offset = addr-$C800):
+;     $C800-$C9FF  this code
+;     $CA00-$CDFF  screen image, laid out like text page 1 ($0400-$07FF)
+;     $CE00-$CEFF  mailbox, the only part the Apple can write
+;
+; a2hostd lists /media/a2 and draws the whole menu. This code shows its frames,
+; forwards keys, and returns to the boot ROM when told to, after a2hostd has
+; mounted the chosen disk. With no a2hostd (no magic), or if it stops answering,
+; it returns at once and the drive boots whatever is mounted, like a stock Disk II.
+;
+; The Disk II follows the slot the card is plugged into (slots 4-7; with the
+; card in slots 1-3 it uses slot 6). Before its hello this code lets the card
+; see its own slot select even when the boot scan never reached that slot
+; (hdl/slots/phys_slot_detect.sv): /IOSEL by reading $Cn00/$Cn01 of slots 4-7,
+; /DEVSEL by reading $C0n0 twice for slots 1-3. Those get no $Cnxx read: a card
+; with $C800 firmware there (slot 1's, the SSC in slot 2, the IIe 80-column
+; firmware in slot 3) would take $C800 and pull this code out from under us,
+; and $C0n0 is a plain read on the SSC and the Uthernet II (its mode register).
+; It then reports the slot it runs from. If that is not where the Disk II
+; belongs, a2hostd holds the Apple in reset, moves the Disk II and lets it go:
+; the power-up byte is spoiled first so that reset is a cold start that boots
+; the new slot.
+;
+
+MAGIC0  = $CE00         ; host: $A5 when a2hostd serves the menu
+MAGIC1  = $CE01         ; host: $5A
+FRAME   = $CE02         ; host: bumped after each complete screen image
+CMD     = $CE03         ; host: 1 = boot now, 2 = jump to (TARGET): the hard disk card's $Cn00, or the
+                        ; Disk II in its new slot after a move; 3 = leave to BASIC (ESC);
+                        ; cleared before a hello ack, or 4 there: no menu, BASIC as after a
+                        ; boot scan that finds no disk (card in slot 1 at power-up)
+ACK     = $CE04         ; host: SEQ of the last event it has handled
+TARGET  = $CE05         ; host: $Cn00 to jump to for CMD 2
+SEQ     = $CE08         ; apple: bumped after EVT/KEY are written
+EVT     = $CE09         ; apple: 1 = menu entered, 2 = key
+KEY     = $CE0A         ; apple: key code (bit 7 set)
+MSLOT   = $CE0B         ; apple: slot*16 this menu runs from
+COLD    = $CE0C         ; apple: 1 = entered from the power-up boot scan (reset vector still
+                        ; $E000, nothing has run yet), 0 = from PR#n or a program
+
+SLOT16  = $2B           ; slot*16, which the boot code expects here
+SOFTEV  = $03F2         ; reset vector (the monitor sets $E000 at power-up)
+PWREDUP = $03F4         ; power-up byte: warm start only if = $3F3 EOR $A5
+HOME    = $FC58         ; monitor: clear the text window, cursor to its top left
+DST     = $26           ; screen copy pointers (the boot code sets $26/$27 itself later)
+SRC     = $3E
+TMO     = $3C           ; send timeout counter (2 bytes)
+LASTF   = $40           ; last frame drawn
+
+KBD     = $C000
+KBDSTRB = $C010
+
+        * = $C800
+
+entry   tsx                     ; called from $Cnxx: the slot is in the return address
+        lda $0102,x
+        asl
+        asl
+        asl
+        asl
+        sta SLOT16
+        lda MAGIC0
+        cmp #$A5
+        bne nomenu
+        lda MAGIC1
+        cmp #$5A
+        beq menu
+nomenu  jmp out
+menu    php
+        sei
+        lda $C090               ; let the card see its own slot select:
+        lda $C090               ; slots 1-3 by /DEVSEL
+        lda $C0A0
+        lda $C0A0
+        lda $C0B0
+        lda $C0B0
+        lda $C400               ; slots 4-7 by /IOSEL
+        lda $C401
+        lda $C500
+        lda $C501
+        lda $C600
+        lda $C601
+        lda $C700
+        lda $C701
+        lda $03F3               ; any reset from here on is a cold start
+        eor #$5A
+        sta PWREDUP
+        lda SLOT16
+        sta MSLOT
+        ldx #0
+        lda SOFTEV
+        bne entry0
+        lda SOFTEV+1
+        cmp #$E0
+        bne entry0
+        inx
+entry0  stx COLD
+        lda FRAME
+        eor #$FF
+        sta LASTF               ; draw the first frame whatever its number
+        lda #1                  ; hello: a2hostd rescans and draws the menu
+        jsr send
+        bcs done                ; no answer: boot what is mounted
+        lda CMD                 ; no menu and no boot (card in slot 1 at power-up):
+        cmp #4                  ; what the boot scan does when it finds no disk.
+        bne show                ; The power-up byte is made valid again, later
+        plp                     ; resets go to BASIC's warm start, and BASIC
+        lda SOFTEV+1            ; starts with the screen left alone ("Apple ][").
+        eor #$A5                ; PR#n then brings the menu.
+        sta PWREDUP
+        lda #3
+        sta SOFTEV
+        jmp $E000
+show    sta $C051               ; text
+        sta $C054               ; page 1
+        sta $C00C               ; 40 columns
+        sta $C000               ; 80STORE off
+        sta $C004               ; stores go to main RAM
+        sta $C00E               ; primary character set
+        bit KBDSTRB             ; forget a key pressed before the menu
+loop    lda FRAME
+        cmp LASTF
+        beq nofrm
+        sta LASTF
+        jsr copy
+nofrm   lda CMD
+        bne command
+        lda KBD
+        bpl loop
+        bit KBDSTRB
+        sta KEY
+        lda #2
+        jsr send
+        bcc loop
+        bcs done                ; host went away: boot what is mounted
+command cmp #2
+        bne notmove
+        lda FRAME               ; boot another card: the hard disk picked in the menu,
+        cmp LASTF               ; or the Disk II after a move whose reset did not take.
+        beq jump                ; Show the frame sent with the command first.
+        jsr copy
+jump    plp
+        jmp (TARGET)
+notmove cmp #3
+        beq exit
+boot    lda FRAME               ; show the frame sent with the boot command
+        cmp LASTF
+        beq done
+        jsr copy
+done    plp
+out     ldx SLOT16
+        rts
+
+; ESC: leave to BASIC without booting, as Ctrl-Reset would. The power-up byte
+; is made valid again (it was spoiled above), then HOME clears the screen and
+; its RTS "returns" where RESET goes next: (SOFTEV). The first time that is
+; still the power-up $E000 (BASIC's cold start) and, as the monitor's RESET
+; does, later resets go to BASIC's warm start ($E003). Nothing runs from $C800
+; after the JMP.
+exit    plp
+        lda SOFTEV+1
+        eor #$A5
+        sta PWREDUP
+        lda SOFTEV              ; push (SOFTEV)-1 for HOME's RTS
+        sec
+        sbc #1
+        tax
+        lda SOFTEV+1
+        sbc #0
+        pha
+        txa
+        pha
+        lda SOFTEV
+        bne exhome
+        lda SOFTEV+1
+        cmp #$E0
+        bne exhome
+        lda #3
+        sta SOFTEV
+exhome  jmp HOME
+
+; Post event A (KEY already set) and wait up to ~1.2 s for the host to ack it.
+; Returns C=0 when acked, C=1 on timeout.
+send    sta EVT
+        inc SEQ
+        lda #0
+        sta TMO
+        sta TMO+1
+sndw    lda ACK
+        cmp SEQ
+        beq sndok
+        inc TMO
+        bne sndw
+        inc TMO+1
+        bne sndw
+        sec
+        rts
+sndok   clc
+        rts
+
+; Copy the screen image to text page 1, leaving the screen holes ($x78-$x7F,
+; $xF8-$xFF) alone: they belong to the peripheral cards.
+copy    ldy #0
+        sty DST
+        sty SRC
+        lda #$04
+        sta DST+1
+        lda #$CA
+        sta SRC+1
+        ldx #4
+cpage   tya                     ; Y = 0
+cbyte   and #$7F
+        cmp #$78
+        bcs chole
+        lda (SRC),y
+        sta (DST),y
+chole   iny
+        tya
+        bne cbyte
+        inc DST+1
+        inc SRC+1
+        dex
+        bne cpage
+        rts
+
+; ---- initial RAM image (the bitstream loads this; a2hostd rewrites it) ----
+        !fill $CA00-*, $00
+        !fill $0400, $A0        ; blank screen image
+        !fill $0100, $00        ; mailbox: no magic until a2hostd is up

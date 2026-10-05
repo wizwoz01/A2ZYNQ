@@ -1,0 +1,57 @@
+header,physical_pin,package_ball,logical_signal,direction,interface
+U12,1,U22,a2_data[0],bidirectional,U5
+U12,2,T22,a2_data[1],bidirectional,U5
+U12,3,W22,a2_data[2],bidirectional,U5
+U12,4,V22,a2_data[3],bidirectional,U5
+U12,5,Y21,a2_data[4],bidirectional,U5
+U12,6,Y20,a2_data[5],bidirectional,U5
+U12,7,AB22,a2_data[6],bidirectional,U5
+U12,8,AA22,a2_data[7],bidirectional,U5
+U12,9,AB21,a2_data_dir,output,U5 DIR
+U12,10,AA21,a2_data_oe_n,output,U5 OE#
+U12,11,AB19,a2_addr[0],input,U1
+U12,12,AB20,a2_addr[1],input,U1
+U12,13,AA19,a2_addr[2],input,U1
+U12,14,Y19,a2_phi0,input,U3
+U12,15,AB16,a2_addr[3],input,U1
+U12,16,AA16,a2_addr[4],input,U1
+U12,17,Y18,a2_phi1,input,U3
+U12,18,AA18,a2_addr[5],input,U1
+U12,19,AB14,a2_addr[6],input,U1
+U12,20,AB15,a2_addr[7],input,U1
+U12,21,Y13,a2_addr[8],input,U2
+U12,22,AA13,a2_addr[9],input,U2
+U12,23,V13,a2_addr[10],input,U2
+U12,24,W13,a2_addr[11],input,U2
+U12,25,W18,a2_addr[12],input,U2
+U12,26,W17,a2_7m,input,U3
+U12,27,AA17,a2_addr[13],input,U2
+U12,28,AB17,a2_addr[14],input,U2
+U12,29,W16,a2_q3,input,U3
+U12,30,Y16,a2_addr[15],input,U2
+U12,31,Y14,a2_rw,input,U3
+U12,32,AA14,a2_iosel_n,input,U3
+U12,33,V15,a2_iostrb_n,input,U3
+U12,34,V14,a2_devsel_n,input,U3
+U13,1,H19,a2_m2sel,input,U4
+U13,2,H20,a2_m2b0,input,U4
+U13,3,E18,a2_irq_assert,output,Q1
+U13,4,F18,a2_nmi_assert,output,Q2
+U13,5,F17,a2_rdy_assert,output,Q3
+U13,6,G17,a2_dma_assert,output,Q4
+U13,7,C17,a2_inh_assert,output,Q5
+U13,8,C18,a2_reset_assert,output,Q6
+U13,9,G19,a2_rdy_n_sense,input,U4
+U13,10,F19,a2_dma_n_sense,input,U4
+U13,11,E20,a2_nmi_n_sense,input,U4
+U13,12,E19,a2_irq_n_sense,input,U4
+U13,13,D22,bus_input_oe_n,output,U1-U4 OE#
+U13,14,C22,apple_5v_present,input,15k/22k divider
+U13,15,B22,switch1_n,input,DIP switch
+U13,16,B21,switch2_n,input,DIP switch
+U13,17,B17,switch3_n,input,DIP switch
+U13,18,B16,switch4_n,input,DIP switch
+U13,19,A17,a2_sync,input,U4
+U13,20,A16,a2_reset_asserted_sense,input,Q7 collector; active high
+U13,21,D20,a2_inh_n_sense,input,U4
+U13,27,D15,pl_ready,output,status/test

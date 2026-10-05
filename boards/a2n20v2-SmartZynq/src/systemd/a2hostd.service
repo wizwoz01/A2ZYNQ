@@ -1,0 +1,22 @@
+[Unit]
+Description=A2N20v2 Smart-Zynq Apple II service host
+After=local-fs.target network-online.target systemd-udev-settle.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/sbin/a2hostd --root /media/a2 --settings /var/lib/a2host/settings.ini --net-if eth0
+Restart=on-failure
+RestartSec=2
+User=root
+LimitNOFILE=4096
+# CAP_NET_RAW: Uthernet MAC bridge. CAP_NET_BIND_SERVICE: telnet/ftp on 23/21.
+# Without BIND_SERVICE, network.start() fails silently and status/rescan are dead.
+AmbientCapabilities=CAP_NET_RAW CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_RAW CAP_NET_BIND_SERVICE
+NoNewPrivileges=true
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

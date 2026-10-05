@@ -1,0 +1,51 @@
+Apple_pin,Signal,Direction_at_card,Interface
+1,/IOSEL,input,U3 SN74LVC245A
+2,A0,input,U1
+3,A1,input,U1
+4,A2,input,U1
+5,A3,input,U1
+6,A4,input,U1
+7,A5,input,U1
+8,A6,input,U1
+9,A7,input,U1
+10,A8,input,U2
+11,A9,input,U2
+12,A10,input,U2
+13,A11,input,U2
+14,A12,input,U2
+15,A13,input,U2
+16,A14,input,U2
+17,A15,input,U2
+18,R/W,input,U3
+19,SYNC,input,U4
+20,/IOSTRB,input,U3
+21,/RDY,bidirectional-shared,U4 sense + Q3 open collector
+22,/DMA,bidirectional-shared,U4 sense + Q4 open collector
+23,/INTOUT,not-connected,NC matching original A2N20v2 schematic
+24,/DMAOUT,not-connected,NC matching original A2N20v2 schematic
+25,+5V,sense-only,15k/22k divider; never powers Zynq
+26,GND,power,common ground bundle
+27,/DMAIN,not-connected,NC matching original A2N20v2 schematic
+28,/INTIN,not-connected,NC matching original A2N20v2 schematic
+29,/NMI,bidirectional-shared,U4 sense + Q2 open collector
+30,/IRQ,bidirectional-shared,U4 sense + Q1 open collector
+31,/RES,bidirectional-shared,Q7 inverting sense + Q6 open collector
+32,/INH,bidirectional-shared,U4 sense + Q5 open collector
+33,-12V,not-connected,leave isolated
+34,-5V,not-connected,leave isolated
+35,COLORREF/M2B0,input,U4
+36,7M,input,U3 via series resistor
+37,Q3,input,U3 via series resistor
+38,PHI1,input,U3 via series resistor
+39,USER1/SYNC/M2SEL,input,U4
+40,PHI0,input,U3 via series resistor
+41,/DEVSEL,input,U3
+42,D7,bidirectional,U5
+43,D6,bidirectional,U5
+44,D5,bidirectional,U5
+45,D4,bidirectional,U5
+46,D3,bidirectional,U5
+47,D2,bidirectional,U5
+48,D1,bidirectional,U5
+49,D0,bidirectional,U5
+50,+12V,not-connected,leave isolated

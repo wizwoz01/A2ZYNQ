@@ -1,0 +1,1 @@
+`define LEGACY_HAS_MEM_PORT

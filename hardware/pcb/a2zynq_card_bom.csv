@@ -1,0 +1,20 @@
+References,Qty,Value,Footprint,Old schematic name,Notes
+C1 C2 C3 C4 C5,5,100 nF,C_Disc_D3.0mm_W1.6mm_P2.50mm,CDEC1 CDEC2 CDEC3 CDEC4 CDEC5,"ceramic, 2.5 mm lead spacing"
+C6,1,100 uF 10 V,CP_Radial_D6.3mm_P2.50mm,CBULK1,"electrolytic, 6.3 mm, 2.5 mm spacing, 7 mm tall or less (sits under the Smart Zynq)"
+C7,1,10 uF 10 V,CP_Radial_D5.0mm_P2.00mm,CBULK2,"electrolytic, 5 mm, 2.0 mm spacing, 7 mm tall or less"
+D1,1,1N5822,D_DO-201AD_P5.08mm_Vertical_KathodeUp,,"OPTIONAL, only with JP1: 3 A Schottky, mounted upright, band (cathode) on the top lead"
+JP1,1,1x2 pin header + jumper,PinHeader_1x02_P2.54mm_Vertical,,"OPTIONAL 5V link, leave OPEN unless D1 is fitted (docs/power.md)"
+JZ1,1,2x20 female header 2.54 mm,SmartZynq_2x20_U12,,"Smart Zynq U12 (bank 33); standard 8.5 mm socket for mounting the board on the card, or a 2x20 box header for a ribbon cable"
+JZ2,1,2x20 female header 2.54 mm,SmartZynq_2x20_U13,,"Smart Zynq U13 (bank 35); standard 8.5 mm socket for mounting the board on the card, or a 2x20 box header for a ribbon cable"
+Q1 Q2 Q3 Q4 Q5 Q6 Q7,7,2N3904,TO-92_Inline_Wide,,"TO-92, E-B-C pinout (PN2222A also works if it is E-B-C)"
+R1 R2 R3 R4 R5 R6,6,2.2k,R_Axial_DIN0204_L3.6mm_D1.6mm_P5.08mm_Horizontal,RBASE1 RBASE2 RBASE3 RBASE4 RBASE5 RBASE6,"0204 size axial (3.6 mm body), 5.08 mm lead spacing, 1/6 W or more"
+R7 R8 R9 R10 R11 R12 R16 R17 R18,9,10k,R_Axial_DIN0204_L3.6mm_D1.6mm_P5.08mm_Horizontal,RBE1 RBE2 RBE3 RBE4 RBE5 RBE6 ROE_IN ROE_DATA RDIR_DATA,"0204 size axial (3.6 mm body), 5.08 mm lead spacing, 1/6 W or more"
+R13 R23,2,15k,R_Axial_DIN0204_L3.6mm_D1.6mm_P5.08mm_Horizontal,RRESET_BASE RSENSE_TOP,"0204 size axial (3.6 mm body), 5.08 mm lead spacing, 1/6 W or more"
+R14,1,100k,R_Axial_DIN0204_L3.6mm_D1.6mm_P5.08mm_Horizontal,RRESET_BE,"0204 size axial (3.6 mm body), 5.08 mm lead spacing, 1/6 W or more"
+R15,1,4.7k,R_Axial_DIN0204_L3.6mm_D1.6mm_P5.08mm_Horizontal,RRESET_COL,"0204 size axial (3.6 mm body), 5.08 mm lead spacing, 1/6 W or more"
+R19 R20 R21 R22,4,33R,R_Axial_DIN0204_L3.6mm_D1.6mm_P5.08mm_Horizontal,RSER1 (PHI0) RSER2 (PHI1) RSER3 (7M) RSER4 (Q3),"0204 size axial (3.6 mm body), 5.08 mm lead spacing, 1/6 W or more"
+R24,1,22k,R_Axial_DIN0204_L3.6mm_D1.6mm_P5.08mm_Horizontal,RSENSE_BOTTOM,"0204 size axial (3.6 mm body), 5.08 mm lead spacing, 1/6 W or more"
+SW1,1,4-position DIP switch,SW_DIP_SPSTx04_Slide_9.78x12.34mm_W7.62mm_P2.54mm,,"slide type, 2.54 mm pitch, 7.62 mm row spacing"
+TP1,1,test point,TestPoint_THTPad_D2.0mm_Drill1.0mm,,optional ground loop for a scope clip
+U1 U2 U3 U4 U5,5,SN74LVC245AN,DIP-20_W7.62mm,SN74LVC245A SN74LVC245A SN74LVC245A SN74LVC245A SN74LVC245A,"PDIP-20. Exactly this part: not HC/HCT/LS, never TXB0108/TXS0108E. A socket is fine."
+MH1-MH4,4,M3 standoff + screw,MountingHole_3.2mm_M3,,standoff length = header stack height (about 11 mm with 8.5 mm sockets)

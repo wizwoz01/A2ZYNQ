@@ -1,0 +1,29 @@
+/* PetaLinux-style fragment only. Xillinux has no system-conf.dtsi or
+ * &amba_pl. The bootable DTB is produced by tools/merge_dtb.py
+ * from the stock Smart-Zynq bootfiles/devicetree.dtb.
+ */
+/include/ "system-conf.dtsi"
+
+/ {
+    chosen {
+        bootargs = "console=ttyPS0,115200 root=/dev/mmcblk0p2 rw rootwait uio_pdrv_genirq.of_id=generic-uio";
+    };
+
+    reserved-memory {
+        #address-cells = <1>;
+        #size-cells = <1>;
+        ranges;
+
+        a2_pl_ddr: a2-pl-ddr@1e000000 {
+            no-map;
+            reg = <0x1e000000 0x00800000>;
+        };
+    };
+};
+
+&amba_pl {
+    a2_spi_transport: a2-spi-transport@43c40000 {
+        compatible = "generic-uio";
+        reg = <0x43c40000 0x00040000>;
+    };
+};

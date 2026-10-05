@@ -1,0 +1,98 @@
+A2ZYNQ - Licensing
+==================
+
+A2ZYNQ is a port of the A2FPGA Multicard core (https://github.com/a2fpga/a2fpga_core)
+to the Smart Zynq SP board. Most of the logic in hdl/ and boards/ came from
+A2FPGA, and I kept its licensing exactly as it is upstream. Like A2FPGA, the
+licensing here is layered: the license header in each file is authoritative
+for that file, and this document explains how the pieces fit together.
+
+1. Code from A2FPGA, and code I wrote for A2ZYNQ
+------------------------------------------------
+
+Files from the A2FPGA project that do not state a different license in their
+header are under the MIT License (full text below), copyright the A2FPGA
+contributors.
+
+The files I wrote or changed for A2ZYNQ (the Smart Zynq wrapper in
+boards/a2n20v2-SmartZynq/rtl, the build scripts, a2hostd changes, the disk
+menu, the SSC network bridge, the tests and the tools) are released under the
+same MIT License, copyright Ricardo Cervantes, unless their header says
+otherwise.
+
+2. Third-party code
+-------------------
+
+Files from other authors keep their original licenses, as stated in their
+headers. Most are permissive (MIT/BSD-style). These components are under the
+GNU General Public License (full texts in the LICENSES/ directory):
+
+  - hdl/support/via6522.vhd - VIA 6522 core, Gideon Zweijtzer
+    (1541ultimate project), GPL-3.0
+  - hdl/support/TMS5220.vhd - TMS5220 speech chip core, d18c7db,
+    GPL-3.0-or-later
+  - hdl/support/iir_filter.v (and board-local copies) - audio IIR filter,
+    Sorgelig (MiSTer project), GPL-2.0-or-later
+  - hdl/disk/hdd_rom.a65 - ProDOS HDD controller firmware, adapted from
+    AppleWin, GPL-2.0-or-later
+  - boards/a2n20v2-SmartZynq/src/a2hostd/src/gcr_dsk.c - 6-and-2 GCR codec
+    ported from AppleWin, GPL-2.0-or-later
+
+3. Combined works
+-----------------
+
+The complete logic design for the board includes GPL components listed
+above, so the A2ZYNQ bitstream is a combined work conveyed, as a whole, under
+the GNU General Public License version 3 (LICENSES/GPL-3.0.txt). The same goes
+for the a2hostd binary, which links the AppleWin-derived GCR codec. The
+corresponding source is this repository, including the scripts needed to
+rebuild the bitstream and a2hostd.
+
+The MIT license on the A2FPGA and A2ZYNQ files is GPL-compatible: you can
+still take those individual files into other projects under MIT terms. If you
+build a design from this repository that includes any of the GPL components,
+your combined design is subject to the GPL.
+
+4. Things that are NOT in this repository
+-----------------------------------------
+
+The Xillinux evaluation kit for the Smart Zynq SP (block design, boot files,
+Linux image) belongs to Xillybus Ltd. and is distributed by them under their
+own terms. The build downloads nothing and redistributes nothing from it; you
+get it yourself (see third_party/README.md). Vivado and its IP cores are
+AMD/Xilinx products under AMD's license.
+
+Apple II disk images, ROMs and software (Total Replay, games, ProDOS, DOS 3.3,
+IP65) are not included. Total Replay and IP65 are free downloads from their
+own projects.
+
+The proto card schematics and wiring notes in hardware/ are my own work and
+are not derived from the GPL components above.
+
+If you reuse any code from this project, check the header of each file you
+take to confirm that your intended use is covered.
+
+---------------------------------------------------------------------
+
+MIT License
+
+Copyright (c) the A2FPGA contributors
+Copyright (c) 2026 Ricardo Cervantes
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

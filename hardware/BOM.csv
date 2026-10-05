@@ -1,0 +1,23 @@
+Reference,Quantity,Part,Package,Value/Variant,Purpose
+U1-U5,5,SN74LVC245A,PDIP-20,SN74LVC245AN,5V-tolerant explicitly-directed Apple bus buffering
+Q1-Q6,6,2N3904 or 2N2222A,TO-92,verify pinout,Open-collector assertion of IRQ NMI RDY DMA INH RESET
+Q7,1,2N3904 or 2N2222A,TO-92,verify pinout,5V-to-3.3V inverting level shift for Apple /RES sense
+RBASE1-RBASE6,6,Resistor,through-hole,2.2k,NPN base current limiting for shared-line assertion outputs
+RBE1-RBE6,6,Resistor,through-hole,10k,NPN base-to-emitter pull-down for shared-line assertion outputs
+RRESET_BASE,1,Resistor,through-hole,15k,Apple /RES to Q7 base current limiting
+RRESET_BE,1,Resistor,through-hole,100k,Q7 base-to-emitter pull-down
+RRESET_COL,1,Resistor,through-hole,4.7k,Q7 collector pull-up to Smart Zynq 3.3V
+ROE_IN,1,Resistor,through-hole,10k,U1-U4 input-transceiver OE# safe-disable pull-up
+ROE_DATA,1,Resistor,through-hole,10k,U5 data-transceiver OE# safe-disable pull-up
+RDIR_DATA,1,Resistor,through-hole,10k,U5 data-transceiver DIR safe Apple-to-Zynq pull-up
+RSER1-RSER4,4,Resistor,through-hole,22-33 ohm,Series damping for PHI0 PHI1 7M Q3 at U3 input
+RSENSE_TOP,1,Resistor,through-hole,15k,Apple +5V presence divider upper leg
+RSENSE_BOTTOM,1,Resistor,through-hole,22k,Apple +5V presence divider lower leg
+CDEC1-CDEC5,5,Ceramic capacitor,through-hole,100nF,One directly across each LVC245 VCC/GND
+CBULK1,1,Electrolytic capacitor,through-hole,47-220uF 10V,3.3V bulk decoupling at cable entry
+CBULK2,1,Ceramic/electrolytic capacitor,through-hole,10uF 10V,3.3V local bulk decoupling
+SW1,1,DIP switch,through-hole,4-position,Feature configuration inputs
+JZ1,1,2x20 keyed header,2.54mm,U12/J6 cable,Smart Zynq Bank33 connection
+JZ2,1,2x20 keyed header,2.54mm,U13/J5 cable,Smart Zynq Bank35 connection
+JGND,1,Header,2.54mm,at least 1x4,Separate multi-conductor common-ground connection
+TP1-TP20,20,Test point,through-hole,,Power clocks OE DIR reset-sense and shared-line diagnostics

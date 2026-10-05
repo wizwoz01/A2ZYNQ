@@ -1,0 +1,130 @@
+# Gotchas & Hard-Won Lessons
+
+Non-obvious traps that have each cost real debugging time. Read the relevant section before
+working in these areas. **When you discover a new one, add it here** — that's the whole point.
+
+> Many of these were captured from debugging sessions. They reflect what was true when
+> written; if one names a file/line/parameter, confirm it still matches current code before
+> relying on it.
+
+## Don't-touch list
+
+- **`hdl/sdram/sdram.sv` — do not modify.** The SDRAM controller is load-bearing and timing-tuned.
+- **`FB_READ_BURST_WORDS` must be `2`.** A value of `4` deadlocks the SDRAM.
+
+## Gowin synthesis quirks
+
+- **GW2AR supports distributed RAM; GW5AT does NOT** (GW5AT emits warnings and falls back to FFs).
+- `(* syn_preserve=1 *)` prevents register merging **and** distributed-RAM inference.
+- **Registered BSRAM reads are required:** `always @(posedge clk) x <= mem[addr];`
+- **Wire declarations inside named `generate` blocks:** Gowin creates *local implicit* wires
+  if the module-level wires aren't declared **before** the generate block. Declare SSP/RGB
+  wires before the generate scope.
+- **Module boundaries do NOT stop cross-module constant propagation on GW5AT.**
+  `syn_dont_touch` / `syn_preserve` keep registers but not their D inputs. For CDC modules,
+  use explicit wire ports (not interfaces) as defense-in-depth.
+- **`$clog2(1) == 0`** → zero-width register. Avoid parameter values that produce this
+  (e.g. `GAP_CYCLES = 1`).
+
+## Interface / array traps
+
+- **Interface array direction mismatch:** a `[N-1:0]` (descending) declaration connected to a
+  module port declared `[0:N-1]` (ascending) **reverses all indices**. Symptom: CDC instances
+  wired to the wrong-port signals. Fix: match directions at both declaration and port.
+
+## Clock-domain-crossing (CDC)
+
+- On the **GW5AT**, the gray-code `async_fifo` corrupted data crossing 54 MHz → 74.25 MHz
+  (rippling band in TEXT40 mode). Fix used: **toggle-based CDC handshake** instead of the
+  async FIFO for the affected ports.
+- For CDC "pending" flags, set them from the client signals **directly**, not from registered
+  copies (registered copies introduced pixel noise).
+- The split-clock SDRAM design (108 MHz SDRAM / 54 MHz logic) is bridged by a CDC module; in
+  Gowin SDC, `set_false_path` was the only reliable timing constraint (multicycle was broken,
+  max_delay marginal).
+
+## Video pipeline
+
+- **`vgc_gen` `active` must be COMBINATIONAL.** A registered `active` creates a phase mismatch
+  with `framebuffer_writer`'s pixel-tick sampling.
+- **`apple_video_gen` `active` may be REGISTERED** (fetch runs concurrently) — but it must not
+  have a default clear at the top of the always block.
+- **VGC path needs `GAP_CYCLES >= 2`** (DDR3 write-group pending needs a 1-cycle gap).
+
+## DDR3 (a2mega) specifics
+
+- **Power-cycle between flashes.** Reprogramming without a power cycle can fail DDR3 init,
+  producing a black screen that looks like a logic bug but isn't.
+- **PnR variance:** identical designs can yield 0–198 timing violations between runs on GW5AT.
+  Re-run before assuming a regression.
+- Two distinct display-defect classes have been seen — *slow/stale updates* (port contention,
+  fixed with wide 128-bit writes + write port priority) vs. *moving distortion* (timing margin
+  at 432 MHz). Diagnose which class before chasing a fix.
+
+## GW5A BSRAM inference (a2mega)
+
+- **One address per BSRAM port.** An inferred dual-port array where one port uses a
+  *different* address for writes vs. reads (e.g. `if (wr) mem[waddr] <= d; else q <= mem[raddr];`)
+  needs a third address port, cannot map to a physical DPB, and — since GW5A has **no
+  distributed RAM** (`WARN IF0005`) — silently explodes into LUTs/FFs (hundreds of thousands of
+  LUTs; synthesis then grinds for tens of minutes before `ERROR RP0006`). Mux the address by
+  direction instead. Two R/W ports with one address each (the `hdd.sv`/`uthernet2.sv` pattern)
+  infer fine.
+- **The GW5AT-60 has 118 BSRAMs and the a2mega uses nearly all of them.** Any new BSRAM must
+  reclaim one first. Note the biggest pool — the Ensoniq 64KB wavetable (32 BSRAMs) — is NOT
+  simply movable to DDR3: the DOC has a hard ~838 ns per-fetch deadline (timeout = audible
+  silence) and DDR3 tail latency (burst queue + refresh + CDC) misses it; that is why it was
+  moved to BSRAM in the first place. Much of the a2mega's BSRAM spend (CDC FIFOs, line-buffer
+  lead, DOC wavetable, disk buffers) is deliberate latency insulation against DDR3 variance.
+- **Do NOT convert `ddr3_port_cdc`'s FIFOs to registers to save BSRAM.** GW5A has no
+  distributed RAM, so shallow FIFOs land in BSRAM and look like easy savings — but FF-array
+  buffers crossing independent clocks **corrupt data on GW5AT** (the debugged "8-char rippling
+  band" bug; see the comments in `hdl/ddr3/ddr3_port_cdc.sv` and the DDR3 project notes).
+  BSRAM's physically independent clock ports are the fix. Only *single-clock* small FIFOs
+  (e.g. `framebuffer_480p`'s rd_fifo) may use `syn_ramstyle="registers"`.
+- **`gw_sh` exits 0 on fatal errors.** `tools/build.sh` now greps for `ERROR` lines and rejects
+  stale bitstreams; don't bypass it — a raw gw_sh run can leave a previous build's bitstream
+  and timing report in `impl/pnr/` looking like a success.
+
+## SDRAM clock phase (ghosting) — historical
+
+- A ghosting artifact on the GW2AR traced to the SDRAM read clock phase (`PSDA_SEL` in the PLL).
+  Known-good value is `"1010"` (~225°). This is a clue for any future SDRAM read-data integrity
+  issue.
+
+## See also
+
+- [docs/BUILDING.md](../BUILDING.md) — how the A2ZYNQ bitstream is built and timing-checked
+- [architecture.md](architecture.md) — the pipeline these traps live in
+- `boards/<board>/TODO.md` — current, board-specific open issues
+
+## a2mega: recovering from a corrupt/interrupted config-flash write (GW5A)
+
+An interrupted `openFPGALoader` flash write leaves a half-written image. The
+GW5A then retries booting it, and every subsequent standard flash attempt
+fails at "Read ID failed" — because openFPGALoader's **flash phase defaults
+to a 10 MHz JTAG clock through the ESP32 bridge, which does not work on this
+board**; 500 kHz does (proven repeatedly: dumps, JEDEC ID, bulk erase).
+
+**Decision rule: whenever the board is in an INDETERMINATE state where
+flash corruption is possible** — a flash write errored or was interrupted,
+the FPGA stops configuring at power-on (no DONE/READY LEDs), or JTAG flash
+operations fail unexpectedly — **do not iterate on writes: bulk-erase first**
+(`--freq 500000 --bulk-erase`), then flash normally. A blank flash returns
+the board to well-understood factory behavior; a half-written image creates
+the failure spiral documented above.
+
+Recovery recipe (validated 2026-07-10):
+1. `openFPGALoader -c esp32s3 --freq 500000 --bulk-erase`  (JEDEC ID reads
+   clean at this speed; the chip is a Winbond W25Q64)
+2. Replug the board USB (fresh power window; the chain usually goes dark
+   after any flash-phase operation).
+3. `tools/flash.sh a2mega` — with the flash blank the board behaves factory-
+   fresh and the standard full-speed write + verify completes first try.
+
+While the flash is corrupt the board remains fully usable via SRAM loads
+(`tools/flash.sh a2mega --sram`, first-try reliable in a fresh power
+window). Related: the ESP32's bit-bang GW5A SPI-flash path (fpgaupdate /
+fpgaflash CLI) is NOT yet silicon-validated — its status reads returned
+busy/0xFF in both entry modes; do not rely on it until debugged against
+openFPGALoader's working 500 kHz sequence.

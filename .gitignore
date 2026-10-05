@@ -1,0 +1,51 @@
+# Build outputs
+boards/*/build/
+*.bit
+!boards/*/prebuilt/*.bit
+*.o
+*.a
+boards/*/src/a2hostd/a2hostd
+boards/*/src/a2hostd/build/
+
+# Vivado / xsim leftovers
+*.jou
+*.log
+*.str
+*.wdb
+*.pb
+.Xil/
+xsim.dir/
+work/
+vivado*.backup.*
+webtalk*
+usage_statistics_webtalk.*
+*.pristine
+
+# The Xillinux kit is downloaded separately (see third_party/README.md)
+third_party/xillinux-eval-*/
+third_party/*.zip
+third_party/*.img
+third_party/*.img.gz
+
+# Apple II disk images are not part of the repo (bring your own)
+*.dsk
+*.do
+*.nib
+*.hdv
+*.2mg
+*.woz
+tests/cardtest/*.po
+tests/cardtest/*.system
+tests/cardtest/cardtest
+tests/cardtest/build/
+
+# Python / editors / OS
+__pycache__/
+*.pyc
+.venv/
+venv/
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store

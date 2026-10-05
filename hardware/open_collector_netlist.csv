@@ -1,0 +1,7 @@
+Ref,Zynq_header,Zynq_pin,Logical_signal,Base_resistor,Base_pulldown,Collector_Apple_pin,Emitter
+Q1,U13,3,irq_assert,2.2k,10k,30 /IRQ,GND
+Q2,U13,4,nmi_assert,2.2k,10k,29 /NMI,GND
+Q3,U13,5,rdy_assert,2.2k,10k,21 /RDY,GND
+Q4,U13,6,dma_assert,2.2k,10k,22 /DMA,GND
+Q5,U13,7,inh_assert,2.2k,10k,32 /INH,GND
+Q6,U13,8,reset_assert,2.2k,10k,31 /RES,GND
