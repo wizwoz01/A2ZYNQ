@@ -32,6 +32,32 @@ onto it from my PC over FTP. One card does all of it.
                                            |HDMI          |SD card   |Ethernet
 ```
 
+## See it running
+
+All of these are straight HDMI captures from the board on my IIe. The two
+GIFs run at double speed. (The row of numbers along the top is the debug
+line; DIP switch 4 hides it.)
+
+**The disk menu follows the card.** Same card, moved through slots 1 to 7.
+In slots 1-3 the menu says `SLOT n MENU` and the Disk II answers in slot 6;
+in slots 4-7 it becomes that slot's own `DISK MENU`.
+
+![The disk menu with the card in slots 1 through 7](docs/images/slot_menu.gif)
+
+**Booting a game from the menu.** Arrow down to Oregon Trail, `RETURN`, and
+the IIe boots it off the image on the SD card.
+
+![Picking The Oregon Trail in the menu and booting it](docs/images/oregon_trail.gif)
+
+**The card test disk.** ProDOS boots, then the test program
+([tests/cardtest](tests/cardtest)) goes through every virtual card in
+slots 2-7, writes an 8 KB file back to the floppy, reads it back, and ends
+with `0 FAILED`. This one is a video with sound, so you can hear the
+Mockingboard and SuperSprite test tones come out of the HDMI. Click the
+picture to watch it.
+
+[![The card test finishing with 0 failed (click to watch the video)](docs/images/cardtest.png)](docs/images/cardtest.mp4)
+
 ## Why I built this
 
 I wanted an A2FPGA for my IIe, and I already had a Smart Zynq SP on my bench.
@@ -238,6 +264,7 @@ A2ZYNQ/
     BUILDING.md        building the bitstream and a2hostd
     INSTALLING.md      SD card, first boot, updating
     core/              A2FPGA core documentation (from upstream, with my notes)
+    images/            HDMI captures used in this README
   hardware/            proto card wiring, BOM, pin maps, schematic (PDF)
     pcb/               the card as a PCB: KiCad board, Gerbers, BOM (rev 1.0, untested)
   tests/
