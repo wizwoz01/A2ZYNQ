@@ -5,6 +5,11 @@ Newest notes at the top of each section.
 
 ## Next up
 
+- [ ] **Build the rev 1.0 PCB** ([hardware/pcb](../../hardware/pcb)). Boards
+      are ordered; waiting on delivery. Then: assemble one, meter checks
+      from the PCB README, card test disk on the IIe, check the header stack
+      height and the clearance under the Smart Zynq, and write up what needs
+      changing for rev 1.1. Add photos to the README when it works.
 - [ ] **Test the SSC network bridge on the real Apple.** It passes in
       simulation (`tests/bus_timing/run.sh sscnet`) and the board side is
       deployed. Still to do: `PR#2` / `IN#2` with `nc <board-ip> 6551`, a

@@ -6,7 +6,7 @@ one in [../RED_PROTO_CARD_WIRING.md](../RED_PROTO_CARD_WIRING.md) and the
 and the Smart Zynq SP plugs straight onto the card, so there are no ribbon
 cables and no hand wiring.
 
-> **Status: rev 1.0, not built yet.** The board passes KiCad's DRC with no
+> **Status: rev 1.0, boards ordered, not built yet.** The board passes KiCad's DRC with no
 > errors, and I checked every pad against the CSV netlists. The first
 > boards have not been through the Apple yet, so treat rev 1.0 as a
 > prototype: order the minimum quantity and do the meter checks below before

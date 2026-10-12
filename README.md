@@ -109,6 +109,7 @@ unenhanced IIe:
 | SSC over the network (TCP 6551) | works in simulation, real-Apple test still on my list |
 | Apple IIgs, enhanced IIe, II+ | not tested. The IIgs signals (M2SEL, M2B0) are wired on the card, but I've never tried it. IIgs mode is off by default because DIP switch 4 hides the HDMI debug numbers instead (one setting in `top.sv` swaps it back) |
 | Powering the board from the Apple's +5V | not done yet, see [the power notes](boards/a2n20v2-SmartZynq/docs/power.md) first |
+| The rev 1.0 PCB | ordered, waiting on the boards; see [Work in progress](#work-in-progress) |
 
 Known limits on an unenhanced IIe (these are the machine, not the card):
 anything built for the 65C02 (ProDOS 8 2.x, Contiki, the C versions of the
@@ -116,6 +117,68 @@ IP65 apps) locks up, and 80-column programs show every second character
 without an 80-column card.
 
 The open items are in [boards/a2n20v2-SmartZynq/TODO.md](boards/a2n20v2-SmartZynq/TODO.md).
+
+## Work in progress
+
+The firmware, the gateware and the hand-wired card all work today. The
+hardware is where most of the open work is, so here's where things stand
+and what I'm planning next.
+
+### The PCB (rev 1.0, waiting on boards)
+
+The red proto card works, but it's an evening of point-to-point wiring and
+two ribbon cables hanging out of the Apple. So I laid out a real card:
+[hardware/pcb](hardware/pcb). Same circuit, same five SN74LVC245A, on an
+Apple II card outline (tebl's compact prototyping card), and the Smart Zynq
+plugs straight onto it with its HDMI and Ethernet facing the back of the
+Apple. No ribbons, no hand wiring.
+
+Where it's at:
+
+- [x] Layout done, KiCad DRC clean, every pad checked against the netlist
+      CSVs in [hardware/](hardware/).
+- [x] Gerbers, BOM and an assembly sheet in [hardware/pcb](hardware/pcb).
+- [x] Boards ordered from the fab.
+- [ ] **Waiting on delivery.** Nothing below this line has happened yet.
+- [ ] Assemble the first card, do the meter checks from the PCB README
+      before it goes anywhere near the IIe.
+- [ ] Bring-up in the Apple: card test disk, Disk II boot, hard disk,
+      Mockingboard, Uthernet, all the things the proto card already passes.
+- [ ] Check the fit: header stack height, standoffs, clearance between the
+      Smart Zynq's through-hole pins and the transistors underneath, and
+      whether the card clears its neighbours in the slots.
+- [ ] Fix whatever rev 1.0 gets wrong and post a rev 1.1 with photos.
+
+**Until I've built one and it passes, treat rev 1.0 as untested.** If you
+want to build something right now, build the proto card; the wiring notes
+are complete and that's the version I've been running for weeks.
+
+### Other things I'm working toward
+
+- **Powering the Smart Zynq from the Apple.** The PCB has an optional
+  Schottky diode and jumper (D1, JP1) to feed the board from the Apple's
+  +5V. It ships open and stays that way until I've measured the current
+  draw on USB and tried it on the bench. Notes in
+  [power.md](boards/a2n20v2-SmartZynq/docs/power.md).
+- **SSC network bridge on the real Apple.** It passes in simulation; the
+  real IIe test is next on my list.
+- **Other machines.** Enhanced IIe, II+, and the IIgs (the IIgs signals are
+  already on the card). I only own an unenhanced IIe, so reports are
+  welcome.
+- **A prebuilt release** (bitstream, `a2hostd`, and maybe a ready SD
+  image) so you don't need Vivado to try it.
+- **A small web page on the board** for uploading disks and changing
+  settings, instead of FTP and editing `settings.ini`.
+- **`.woz` image support** for copy-protected originals.
+- **Locking down the network side.** FTP, telnet and the serial bridge have
+  no passwords right now. Fine on my home network, not fine anywhere else.
+  Don't put the board on a network you don't trust yet.
+- **Recovering a crashed 6502** from the board, which needs a closer look at
+  the /RES and /INH stages.
+
+The full list with the details is in
+[TODO.md](boards/a2n20v2-SmartZynq/TODO.md). If you build one, I'd love to
+hear how it went, especially on a machine I haven't tried.
 
 ## What you need
 
@@ -126,6 +189,8 @@ The open items are in [boards/a2n20v2-SmartZynq/TODO.md](boards/a2n20v2-SmartZyn
   40-pin ribbon cables. Parts list in [hardware/BOM.csv](hardware/BOM.csv).
   **Use real SN74LVC245A for the data bus.** Auto-direction translators
   (TXB0108, TXS0108E) do not work, I tried both.
+  (Or the [PCB version](hardware/pcb) once I've confirmed it works, see
+  [Work in progress](#work-in-progress).)
 - A microSD card (4 GB or bigger) for Linux and your disk images.
 - An HDMI monitor, and an Ethernet cable if you want FTP and networking.
 - To build from source: a Linux PC with **Vivado 2024.2** (the free
@@ -173,7 +238,8 @@ A2ZYNQ/
     BUILDING.md        building the bitstream and a2hostd
     INSTALLING.md      SD card, first boot, updating
     core/              A2FPGA core documentation (from upstream, with my notes)
-  hardware/            proto card wiring, BOM, pin maps, schematics (PDF + KiCad)
+  hardware/            proto card wiring, BOM, pin maps, schematic (PDF)
+    pcb/               the card as a PCB: KiCad board, Gerbers, BOM (rev 1.0, untested)
   tests/
     bus_timing/        xsim testbenches for the bus, Disk II, HDD, menu, SSC bridge...
     cardtest/          Apple II test program for slots 2-7 (cc65)
@@ -237,6 +303,7 @@ The long version, with the measurements, is in
 | [docs/INSTALLING.md](docs/INSTALLING.md) | SD card, first boot, updating the board |
 | [boards/a2n20v2-SmartZynq/docs/](boards/a2n20v2-SmartZynq/docs/) | How the Zynq port works inside: SPI host interface, storage, SSC bridge, power, lessons learned |
 | [hardware/RED_PROTO_CARD_WIRING.md](hardware/RED_PROTO_CARD_WIRING.md) | Wiring the proto card, the electrical rules, bring-up checks |
+| [hardware/pcb/README.md](hardware/pcb/README.md) | The PCB version: ordering, how the Smart Zynq sits on it, assembly and meter checks |
 | [docs/core/](docs/core/) | The A2FPGA core docs: architecture, bus interface, memory, video, audio, peripheral cards |
 
 ## Credits
