@@ -53,10 +53,10 @@ the IIe boots it off the image on the SD card.
 ([tests/cardtest](tests/cardtest)) goes through every virtual card in
 slots 2-7, writes an 8 KB file back to the floppy, reads it back, and ends
 with `0 FAILED`. This one is a video with sound, so you can hear the
-Mockingboard and SuperSprite test tones come out of the HDMI. Click the
-picture to watch it.
+Mockingboard and SuperSprite test tones come out of the HDMI. Turn the sound up.
 
-[![The card test finishing with 0 failed (click to watch the video)](docs/images/cardtest.png)](docs/images/cardtest.mp4)
+https://github.com/user-attachments/assets/9a4790e4-1fdd-43f0-96c2-07918a6907ac
+
 
 ## Why I built this
 
